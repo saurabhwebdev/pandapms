@@ -49,35 +49,17 @@ export default function Register() {
   return (
     <div className="min-h-screen flex">
       {/* Left side - Blue section */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary-600 text-white p-12 relative overflow-hidden">
-        <div className="relative z-10">
-          <h1 className="text-4xl font-bold mb-4">Panda Dentist</h1>
-          <p className="text-xl mb-8">Start managing your dental clinic with our advanced system</p>
-          <ul className="space-y-4 mb-8">
-            <li className="flex items-center">
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-              7 Days Free Trial
-            </li>
-            <li className="flex items-center">
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-              Patient Management
-            </li>
-            <li className="flex items-center">
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-              Appointment Scheduling
-            </li>
-          </ul>
-        </div>
-        {/* Decorative circles */}
-        <div className="absolute bottom-0 right-0 transform translate-x-1/4 translate-y-1/4">
-          <div className="w-96 h-96 border-2 border-primary-400 rounded-full opacity-20"></div>
-          <div className="w-72 h-72 border-2 border-primary-400 rounded-full opacity-20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+      <div className="flex-1 bg-primary-600 lg:flex hidden flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <div className="mx-auto w-full max-w-sm lg:w-96 flex flex-col items-center">
+          <img src="/src/assets/happy-panda.svg" alt="Happy Panda" className="w-64 h-64 mb-8" />
+          <div className="text-center">
+            <h2 className="text-2xl font-bold tracking-tight text-white mb-2">
+              Join Panda Dentist
+            </h2>
+            <p className="text-lg text-white/90">
+              Start managing your dental clinic the modern way
+            </p>
+          </div>
         </div>
       </div>
 

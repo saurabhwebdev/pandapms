@@ -28,18 +28,17 @@ export default function Login() {
   return (
     <div className="min-h-screen flex">
       {/* Left side - Blue section */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary-600 text-white p-12 relative overflow-hidden">
-        <div className="relative z-10">
-          <h1 className="text-4xl font-bold mb-4">Panda Dentist</h1>
-          <p className="text-xl mb-8">The most advanced dental clinic management system</p>
-          <button className="px-6 py-2 border-2 border-white rounded-full text-sm hover:bg-white hover:text-primary-600 transition-colors">
-            Read More
-          </button>
-        </div>
-        {/* Decorative circles */}
-        <div className="absolute bottom-0 right-0 transform translate-x-1/4 translate-y-1/4">
-          <div className="w-96 h-96 border-2 border-primary-400 rounded-full opacity-20"></div>
-          <div className="w-72 h-72 border-2 border-primary-400 rounded-full opacity-20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+      <div className="flex-1 bg-primary-600 lg:flex hidden flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <div className="mx-auto w-full max-w-sm lg:w-96 flex flex-col items-center">
+          <img src="/src/assets/happy-panda.svg" alt="Happy Panda" className="w-64 h-64 mb-8" />
+          <div className="text-center">
+            <h2 className="text-2xl font-bold tracking-tight text-white mb-2">
+              Welcome to Panda Dentist
+            </h2>
+            <p className="text-lg text-white/90">
+              Your modern dental clinic management solution
+            </p>
+          </div>
         </div>
       </div>
 

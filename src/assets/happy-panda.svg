@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    @keyframes blink {
+      0%, 90%, 100% { transform: scaleY(1); }
+      95% { transform: scaleY(0.1); }
+    }
+    @keyframes wave {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(10deg); }
+    }
+    #panda { animation: bounce 3s ease-in-out infinite; }
+    #leftEye, #rightEye { animation: blink 4s infinite; }
+    #leftArm { animation: wave 2s ease-in-out infinite; }
+    #bamboo { animation: wave 3s ease-in-out infinite alternate; }
+  </style>
+  
+  <!-- Main Panda Group -->
+  <g id="panda">
+    <!-- Body -->
+    <circle cx="200" cy="220" r="160" fill="white" stroke="black" stroke-width="8"/>
+    
+    <!-- Ears -->
+    <circle cx="100" cy="100" r="40" fill="black"/>
+    <circle cx="300" cy="100" r="40" fill="black"/>
+    
+    <!-- Face -->
+    <g id="face">
+      <!-- Eyes -->
+      <g id="leftEye" transform-origin="150 180">
+        <circle cx="150" cy="180" r="30" fill="black"/>
+        <circle cx="160" cy="170" r="8" fill="white"/>
+      </g>
+      <g id="rightEye" transform-origin="250 180">
+        <circle cx="250" cy="180" r="30" fill="black"/>
+        <circle cx="260" cy="170" r="8" fill="white"/>
+      </g>
+      
+      <!-- Nose -->
+      <ellipse cx="200" cy="220" rx="25" ry="20" fill="black"/>
+      
+      <!-- Cheeks -->
+      <circle cx="140" cy="230" r="20" fill="#FFB6C1" fill-opacity="0.6"/>
+      <circle cx="260" cy="230" r="20" fill="#FFB6C1" fill-opacity="0.6"/>
+      
+      <!-- Mouth -->
+      <path d="M160 250 Q200 280 240 250" stroke="black" stroke-width="8" stroke-linecap="round" fill="none"/>
+    </g>
+    
+    <!-- Arms -->
+    <g id="leftArm" transform-origin="100 250">
+      <path d="M100 250 Q80 280 60 270" stroke="black" stroke-width="20" stroke-linecap="round"/>
+    </g>
+    <path d="M300 250 Q320 280 340 270" stroke="black" stroke-width="20" stroke-linecap="round"/>
+    
+    <!-- Bamboo -->
+    <g id="bamboo" transform-origin="60 270">
+      <rect x="50" y="240" width="10" height="60" fill="#90EE90"/>
+      <rect x="70" y="250" width="10" height="40" fill="#90EE90"/>
+      <rect x="30" y="260" width="10" height="30" fill="#90EE90"/>
+      <circle cx="55" cy="235" r="8" fill="#228B22"/>
+      <circle cx="75" cy="245" r="8" fill="#228B22"/>
+      <circle cx="35" cy="255" r="8" fill="#228B22"/>
+    </g>
+  </g>
+</svg>

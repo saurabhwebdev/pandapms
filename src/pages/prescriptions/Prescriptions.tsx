@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/store';
 import {
   fetchPrescriptions,
@@ -17,6 +17,7 @@ import Modal from '../../components/common/Modal';
 import { Prescription } from '../../types/prescription';
 import toast from 'react-hot-toast';
 import { generatePrescriptionPDF } from '../../utils/pdfGenerator';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 export default function Prescriptions() {
   const dispatch = useAppDispatch();
@@ -27,6 +28,19 @@ export default function Prescriptions() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filter prescriptions based on search term
+  const filteredPrescriptions = useMemo(() => {
+    return prescriptions.filter(prescription => 
+      prescription.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      prescription.date.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      prescription.medicines.some(med => 
+        med.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        med.dosage.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [prescriptions, searchTerm]);
 
   useEffect(() => {
     dispatch(fetchPrescriptions());
@@ -80,7 +94,8 @@ export default function Prescriptions() {
   };
 
   const handlePrintPrescription = (prescription: Prescription) => {
-    generatePrescriptionPDF(prescription);
+    const doc = generatePrescriptionPDF(prescription);
+    doc.save(`Prescription-${prescription.id}.pdf`);
   };
 
   const handleEdit = (prescription: Prescription) => {
@@ -98,14 +113,28 @@ export default function Prescriptions() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-2xl font-semibold text-gray-900">Prescriptions</h1>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-          >
-            Create Prescription
-          </button>
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="relative flex-grow sm:flex-grow-0">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search prescriptions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+              />
+            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 whitespace-nowrap"
+            >
+              Create Prescription
+            </button>
+          </div>
         </div>
 
         {loading && !prescriptions.length ? (
@@ -115,7 +144,7 @@ export default function Prescriptions() {
         ) : (
           <div className="bg-white shadow rounded-lg">
             <PrescriptionList
-              prescriptions={prescriptions}
+              prescriptions={filteredPrescriptions}
               onEdit={handleEdit}
               onDelete={handleDeletePrescription}
               onPrint={handlePrintPrescription}

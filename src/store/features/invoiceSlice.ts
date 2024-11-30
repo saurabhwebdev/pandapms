@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where, orderBy, Timestamp } from 'firebase/firestore';
-import { db } from '../../services/firebase/config';
-import { auth } from '../../services/firebase/config';
+import { db, auth } from '../../services/firebase/config';
 import { Invoice, InvoiceFormData } from '../../types/invoice';
 import { RootState } from '../store';
 
@@ -62,11 +61,12 @@ export const addInvoice = createAsyncThunk(
         ? parseInt(currentInvoices[0].invoiceNumber.slice(-4))
         : 0;
 
-      const now = Timestamp.now().toDate().toISOString();
+      const now = new Date().toISOString();
       const invoiceData = {
         ...data,
         clinicId: user.uid,
         invoiceNumber: generateInvoiceNumber(latestInvoiceNumber),
+        status: data.status || 'draft',
         createdAt: now,
         updatedAt: now,
       };
@@ -89,11 +89,11 @@ export const updateInvoice = createAsyncThunk(
       const invoiceRef = doc(db, 'clinics', user.uid, 'invoices', id);
       const updatedData = {
         ...data,
-        updatedAt: Timestamp.now().toDate().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       await updateDoc(invoiceRef, updatedData);
-      return { id, ...updatedData } as Invoice;
+      return { id, ...updatedData };
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
@@ -127,9 +127,9 @@ export const markInvoiceAsPaid = createAsyncThunk(
       const paidData = {
         status: 'paid',
         paidAmount: amount,
-        paidDate: Timestamp.now().toDate().toISOString(),
+        paidDate: new Date().toISOString(),
         paymentMethod,
-        updatedAt: Timestamp.now().toDate().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       await updateDoc(invoiceRef, paidData);

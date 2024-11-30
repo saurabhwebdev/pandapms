@@ -38,7 +38,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
     discountAmount: 0,
     total: 0,
     status: 'draft',
-    currency: 'INR',
+    currency: 'INR', // Set INR as default currency
     ...initialData,
   });
 
@@ -161,10 +161,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
               value={formData.currency}
               onChange={e => setFormData(prev => ({ ...prev, currency: e.target.value }))}
               className="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              required
             >
-              <option value="INR">INR (₹)</option>
-              <option value="USD">USD ($)</option>
+              <option value="INR">INR</option>
             </select>
           </div>
         </div>

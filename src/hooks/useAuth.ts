@@ -1,44 +1,28 @@
-import { useState, useEffect } from 'react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../services/firebase/config';
-
-interface ClinicUser {
-  clinicName: string;
-  address: string;
-  phone: string;
-  email: string;
-  uid: string;
-}
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { auth } from '../services/firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
+import { setUser, clearUser } from '../store/features/authSlice';
 
 export function useAuth() {
-  const [user, setUser] = useState<ClinicUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const auth = getAuth();
+  const [user, setLocalUser] = useState(auth.currentUser);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const userDoc = await getDoc(doc(db, 'clinics', firebaseUser.uid));
-          if (userDoc.exists()) {
-            setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email || '',
-              ...userDoc.data() as Omit<ClinicUser, 'uid'>
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setLocalUser(user);
+      if (user) {
+        dispatch(setUser({
+          clinicId: user.uid,
+          email: user.email || '',
+        }));
       } else {
-        setUser(null);
+        dispatch(clearUser());
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [dispatch]);
 
-  return { user, loading };
+  return { user };
 }

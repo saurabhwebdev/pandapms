@@ -148,12 +148,14 @@ export default function Appointments() {
           onClose={handleCloseModal}
           title={modalTitle}
         >
-          <AppointmentForm
-            initialData={selectedAppointment || undefined}
-            onSubmit={selectedAppointment ? handleUpdateAppointment : handleAddAppointment}
-            onCancel={handleCloseModal}
-            loading={formLoading}
-          />
+          {({ onClose }) => (
+            <AppointmentForm
+              initialData={selectedAppointment || undefined}
+              onSubmit={selectedAppointment ? handleUpdateAppointment : handleAddAppointment}
+              onCancel={onClose}
+              loading={formLoading}
+            />
+          )}
         </Modal>
       </div>
     </DashboardLayout>

@@ -4,6 +4,8 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../services/firebase/config';
 import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { startTrial } from '../../store/features/subscriptionSlice';
 
 export default function Register() {
   const [clinicName, setClinicName] = useState('');
@@ -12,6 +14,7 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -28,7 +31,8 @@ export default function Register() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
       // Create clinic document
-      await setDoc(doc(db, 'clinics', userCredential.user.uid), {
+      const clinicId = userCredential.user.uid;
+      await setDoc(doc(db, 'clinics', clinicId), {
         clinicName,
         email,
         createdAt: new Date().toISOString(),
@@ -37,7 +41,10 @@ export default function Register() {
         currency: 'INR'
       });
 
-      toast.success('Successfully registered!');
+      // After successful registration
+      await dispatch(startTrial(clinicId));
+      
+      toast.success('Registration successful! Your 7-day trial has started.');
       navigate('/dashboard');
     } catch (error: any) {
       toast.error(error.message || 'Failed to register');
@@ -75,42 +82,53 @@ export default function Register() {
             <div className="space-y-4">
               <div>
                 <input
+                  id="clinicName"
+                  name="clinicName"
                   type="text"
                   required
                   value={clinicName}
                   onChange={(e) => setClinicName(e.target.value)}
                   placeholder="Clinic Name"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-gray-50"
+                  className="block w-full rounded-md border-0 py-1.5 bg-white text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6 px-3"
                 />
               </div>
               <div>
                 <input
+                  id="email"
+                  name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email address"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-gray-50"
+                  className="block w-full rounded-md border-0 py-1.5 bg-white text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6 px-3"
+                  placeholder="Enter your email"
                 />
               </div>
               <div>
                 <input
+                  id="password"
+                  name="password"
                   type="password"
+                  autoComplete="new-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-gray-50"
+                  className="block w-full rounded-md border-0 py-1.5 bg-white text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6 px-3"
+                  placeholder="Create a password"
                 />
               </div>
               <div>
                 <input
+                  id="confirmPassword"
+                  name="confirmPassword"
                   type="password"
+                  autoComplete="new-password"
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm Password"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-gray-50"
+                  className="block w-full rounded-md border-0 py-1.5 bg-white text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6 px-3"
+                  placeholder="Confirm your password"
                 />
               </div>
             </div>

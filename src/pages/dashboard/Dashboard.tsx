@@ -8,6 +8,7 @@ import {
   ClockIcon,
 } from '@heroicons/react/24/outline';
 import DashboardLayout from '../../components/layout/DashboardLayout';
+import SubscriptionStatus from '../../components/SubscriptionStatus';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -129,21 +130,24 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
-        {stats_cards.map((card) => (
-          <div
-            key={card.name}
-            className="flex items-center p-4 bg-white rounded-lg shadow-xs"
-          >
-            <div className={`p-3 mr-4 rounded-full ${card.color} text-white`}>
-              <card.icon className="w-5 h-5" />
+      <div className="container mx-auto px-4 py-8">
+        <SubscriptionStatus />
+        <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
+          {stats_cards.map((card) => (
+            <div
+              key={card.name}
+              className="flex items-center p-4 bg-white rounded-lg shadow-xs"
+            >
+              <div className={`p-3 mr-4 rounded-full ${card.color} text-white`}>
+                <card.icon className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="mb-2 text-sm font-medium text-gray-600">{card.name}</p>
+                <p className="text-lg font-semibold text-gray-700">{card.value}</p>
+              </div>
             </div>
-            <div>
-              <p className="mb-2 text-sm font-medium text-gray-600">{card.name}</p>
-              <p className="text-lg font-semibold text-gray-700">{card.value}</p>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </DashboardLayout>
   );

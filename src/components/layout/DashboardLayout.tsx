@@ -12,10 +12,14 @@ import {
   ArrowLeftOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import TypewriterText from '../common/TypewriterText';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
+import { selectSubscriptionStatus, selectTrialEndsAt } from '../../store/features/subscriptionSlice';
 
 interface Props {
   children: ReactNode;
@@ -35,6 +39,14 @@ const navigation = [
     tooltip: 'Coming Soon'
   },
   { 
+    name: 'Subscription', 
+    href: '/subscription', 
+    icon: CreditCardIcon,
+    badge: (status === 'trialing' && trialEndsAt) ? 
+      `${Math.ceil((new Date(trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days left` : 
+      undefined
+  },
+  { 
     name: 'Settings', 
     href: '/settings', 
     icon: Cog6ToothIcon
@@ -45,6 +57,8 @@ export default function DashboardLayout({ children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const status = useSelector((state: RootState) => state.subscription.status);
+  const trialEndsAt = useSelector((state: RootState) => state.subscription.trialEndsAt);
 
   const handleSignOut = async () => {
     try {
@@ -98,6 +112,11 @@ export default function DashboardLayout({ children }: Props) {
                           aria-hidden="true"
                         />
                         {item.name}
+                        {item.badge && (
+                          <span className="ml-2 inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+                            {item.badge}
+                          </span>
+                        )}
                       </Link>
                       {item.disabled && (
                         <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -163,6 +182,11 @@ export default function DashboardLayout({ children }: Props) {
                               aria-hidden="true"
                             />
                             {item.name}
+                            {item.badge && (
+                              <span className="ml-2 inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+                                {item.badge}
+                              </span>
+                            )}
                           </Link>
                           {item.disabled && (
                             <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">

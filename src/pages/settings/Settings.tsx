@@ -26,42 +26,51 @@ export default function Settings() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchSettings());
+    try {
+      dispatch(fetchSettings());
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+      toast.error('Failed to load settings');
+    }
   }, [dispatch]);
 
   const profileForm = useForm<ClinicProfileForm>({
     defaultValues: {
-      name: settings.clinicProfile.name || '',
-      email: settings.clinicProfile.email || '',
-      phone: settings.clinicProfile.phone || '',
-      address: settings.clinicProfile.address || '',
-      website: settings.clinicProfile.website || ''
+      name: settings?.clinicProfile?.name || '',
+      email: settings?.clinicProfile?.email || '',
+      phone: settings?.clinicProfile?.phone || '',
+      address: settings?.clinicProfile?.address || '',
+      website: settings?.clinicProfile?.website || ''
     }
   });
 
   const invoiceForm = useForm<InvoiceSettingsForm>({
     defaultValues: {
-      taxRate: settings.invoiceSettings.taxRate || 0,
-      termsAndConditions: settings.invoiceSettings.termsAndConditions || '',
-      template: settings.invoiceSettings.template || 'default'
+      taxRate: settings?.invoiceSettings?.taxRate || 0,
+      termsAndConditions: settings?.invoiceSettings?.termsAndConditions || '',
+      template: settings?.invoiceSettings?.template || 'default'
     }
   });
 
   // Update form values when settings are loaded
   useEffect(() => {
-    profileForm.reset({
-      name: settings.clinicProfile.name || '',
-      email: settings.clinicProfile.email || '',
-      phone: settings.clinicProfile.phone || '',
-      address: settings.clinicProfile.address || '',
-      website: settings.clinicProfile.website || ''
-    });
+    if (settings?.clinicProfile) {
+      profileForm.reset({
+        name: settings.clinicProfile.name || '',
+        email: settings.clinicProfile.email || '',
+        phone: settings.clinicProfile.phone || '',
+        address: settings.clinicProfile.address || '',
+        website: settings.clinicProfile.website || ''
+      });
+    }
 
-    invoiceForm.reset({
-      taxRate: settings.invoiceSettings.taxRate || 0,
-      termsAndConditions: settings.invoiceSettings.termsAndConditions || '',
-      template: settings.invoiceSettings.template || 'default'
-    });
+    if (settings?.invoiceSettings) {
+      invoiceForm.reset({
+        taxRate: settings.invoiceSettings.taxRate || 0,
+        termsAndConditions: settings.invoiceSettings.termsAndConditions || '',
+        template: settings.invoiceSettings.template || 'default'
+      });
+    }
   }, [settings, profileForm, invoiceForm]);
 
   const handleProfileSubmit = async (data: ClinicProfileForm) => {
@@ -70,6 +79,7 @@ export default function Settings() {
       await dispatch(updateClinicProfile(data)).unwrap();
       toast.success('Clinic profile updated successfully');
     } catch (error) {
+      console.error('Error updating profile:', error);
       toast.error('Failed to update clinic profile');
     } finally {
       setLoading(false);
@@ -79,9 +89,10 @@ export default function Settings() {
   const handleInvoiceSubmit = async (data: InvoiceSettingsForm) => {
     try {
       setLoading(true);
-      await dispatch(updateInvoiceSettings(data as any)).unwrap();
+      await dispatch(updateInvoiceSettings(data)).unwrap();
       toast.success('Invoice settings updated successfully');
     } catch (error) {
+      console.error('Error updating invoice settings:', error);
       toast.error('Failed to update invoice settings');
     } finally {
       setLoading(false);
@@ -93,9 +104,20 @@ export default function Settings() {
       await dispatch(updateCurrency(currency)).unwrap();
       toast.success('Currency updated successfully');
     } catch (error) {
+      console.error('Error updating currency:', error);
       toast.error('Failed to update currency');
     }
   };
+
+  if (!settings) {
+    return (
+      <DashboardLayout>
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -127,7 +149,7 @@ export default function Settings() {
                   <label className="block text-sm font-medium mb-1">Clinic Name</label>
                   <input
                     {...profileForm.register('name')}
-                    className="w-full p-2 border rounded bg-white text-black"
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-black"
                     placeholder="Enter clinic name"
                   />
                 </div>
@@ -136,7 +158,7 @@ export default function Settings() {
                   <input
                     {...profileForm.register('email')}
                     type="email"
-                    className="w-full p-2 border rounded bg-white text-black"
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-black"
                     placeholder="Enter email"
                   />
                 </div>
@@ -144,7 +166,7 @@ export default function Settings() {
                   <label className="block text-sm font-medium mb-1">Phone</label>
                   <input
                     {...profileForm.register('phone')}
-                    className="w-full p-2 border rounded bg-white text-black"
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-black"
                     placeholder="Enter phone number"
                   />
                 </div>
@@ -152,80 +174,75 @@ export default function Settings() {
                   <label className="block text-sm font-medium mb-1">Website</label>
                   <input
                     {...profileForm.register('website')}
-                    className="w-full p-2 border rounded bg-white text-black"
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-black"
                     placeholder="Enter website URL"
                   />
                 </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1">Address</label>
+                  <textarea
+                    {...profileForm.register('address')}
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-black"
+                    placeholder="Enter clinic address"
+                    rows={3}
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Address</label>
-                <textarea
-                  {...profileForm.register('address')}
-                  className="w-full p-2 border rounded bg-white text-black"
-                  rows={3}
-                  placeholder="Enter clinic address"
-                />
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`px-4 py-2 rounded-md text-white ${
+                    loading ? 'bg-gray-400' : 'bg-primary-600 hover:bg-primary-700'
+                  }`}
+                >
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </button>
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700 disabled:opacity-50"
-              >
-                {loading ? 'Saving...' : 'Save Profile'}
-              </button>
             </form>
           ) : (
             <form onSubmit={invoiceForm.handleSubmit(handleInvoiceSubmit)} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium mb-1">Tax Rate (%)</label>
-                <input
-                  {...invoiceForm.register('taxRate', { valueAsNumber: true })}
-                  type="number"
-                  step="0.01"
-                  className="w-full p-2 border rounded bg-white text-black"
-                  placeholder="Enter tax rate"
-                />
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Tax Rate (%)</label>
+                  <input
+                    {...invoiceForm.register('taxRate', { valueAsNumber: true })}
+                    type="number"
+                    step="0.01"
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Terms and Conditions</label>
+                  <textarea
+                    {...invoiceForm.register('termsAndConditions')}
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-black"
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Invoice Template</label>
+                  <select
+                    {...invoiceForm.register('template')}
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-black"
+                  >
+                    <option value="default">Default</option>
+                    <option value="professional">Professional</option>
+                    <option value="minimal">Minimal</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Terms and Conditions</label>
-                <textarea
-                  {...invoiceForm.register('termsAndConditions')}
-                  className="w-full p-2 border rounded bg-white text-black"
-                  rows={4}
-                  placeholder="Enter terms and conditions"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Invoice Template</label>
-                <select
-                  {...invoiceForm.register('template')}
-                  className="w-full p-2 border rounded bg-white text-black"
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`px-4 py-2 rounded-md text-white ${
+                    loading ? 'bg-gray-400' : 'bg-primary-600 hover:bg-primary-700'
+                  }`}
                 >
-                  <option value="default">Default Template</option>
-                  <option value="professional">Professional Template</option>
-                  <option value="minimal">Minimal Template</option>
-                </select>
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Currency</label>
-                <select
-                  value={settings.currency}
-                  onChange={(e) => handleCurrencyChange(e.target.value)}
-                  className="w-full p-2 border rounded bg-white text-black"
-                >
-                  <option value="USD">USD - US Dollar</option>
-                  <option value="EUR">EUR - Euro</option>
-                  <option value="GBP">GBP - British Pound</option>
-                  <option value="INR">INR - Indian Rupee</option>
-                </select>
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700 disabled:opacity-50"
-              >
-                {loading ? 'Saving...' : 'Save Invoice Settings'}
-              </button>
             </form>
           )}
         </div>

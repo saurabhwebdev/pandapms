@@ -5,6 +5,7 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: './',
   build: {
     assetsDir: 'assets',
     rollupOptions: {
@@ -14,7 +15,7 @@ export default defineConfig({
           if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
             extType = 'img';
           }
-          return `assets/[name]-[hash][extname]`;
+          return `assets/[name][extname]`;
         },
       },
     },

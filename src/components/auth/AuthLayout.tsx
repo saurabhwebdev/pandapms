@@ -12,7 +12,7 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <img
           className="mx-auto h-20 w-auto"
-          src="/assets/panda-logo.svg"
+          src={import.meta.env.BASE_URL + 'assets/panda-logo.svg'}
           alt="Panda Logo"
         />
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -33,7 +33,7 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <img
-          src="/assets/happy-panda.svg"
+          src={import.meta.env.BASE_URL + 'assets/happy-panda.svg'}
           alt="Happy Panda"
           className="mx-auto h-32 w-auto animate-bounce"
         />

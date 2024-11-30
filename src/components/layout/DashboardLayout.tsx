@@ -63,11 +63,14 @@ export default function DashboardLayout({ children }: Props) {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
         <div className="fixed inset-y-0 left-0 flex flex-col w-64 bg-white border-r border-gray-200">
           <div className="flex h-16 shrink-0 items-center px-4">
-            <Link to="/" className="text-xl font-semibold text-primary-600">
-              <TypewriterText text="Panda Dentist" speed={100} />
+            <Link to="/" className="flex items-center gap-2">
+              <img src="/src/assets/panda-logo.svg" alt="Panda Logo" className="h-8 w-8 text-primary-600" />
+              <span className="text-xl font-semibold text-gray-900">
+                <TypewriterText text="Panda Dentist" speed={100} />
+              </span>
             </Link>
           </div>
-          <nav className="flex-1 px-2 py-4 space-y-1">
+          <nav className="flex-1 px-6 py-4 space-y-1">
             <ul>
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
@@ -86,7 +89,7 @@ export default function DashboardLayout({ children }: Props) {
                             : item.disabled
                             ? 'text-gray-400 cursor-not-allowed hover:bg-transparent'
                             : 'text-gray-600 hover:bg-gray-50'
-                        } group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold`}
+                        } group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold`}
                       >
                         <item.icon
                           className={`h-6 w-6 shrink-0 ${
@@ -121,13 +124,16 @@ export default function DashboardLayout({ children }: Props) {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex h-full flex-col bg-white border-r border-gray-200 px-6">
-          <div className="flex h-16 shrink-0 items-center">
-            <Link to="/" className="text-xl font-semibold text-primary-600">
-              <TypewriterText text="Panda Dentist" speed={100} />
+        <div className="flex flex-col flex-grow border-r border-gray-200 bg-white">
+          <div className="flex h-16 shrink-0 items-center px-4">
+            <Link to="/" className="flex items-center gap-2">
+              <img src="/src/assets/panda-logo.svg" alt="Panda Logo" className="h-8 w-8 text-primary-600" />
+              <span className="text-xl font-semibold text-gray-900">
+                <TypewriterText text="Panda Dentist" speed={100} />
+              </span>
             </Link>
           </div>
-          <nav className="flex flex-1 flex-col">
+          <nav className="flex flex-1 flex-col px-6 py-4">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
               <li>
                 <ul className="-mx-2 space-y-1">
@@ -148,7 +154,7 @@ export default function DashboardLayout({ children }: Props) {
                                 : item.disabled
                                 ? 'text-gray-400 cursor-not-allowed hover:bg-transparent'
                                 : 'text-gray-600 hover:bg-gray-50'
-                            } group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold`}
+                            } group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold`}
                           >
                             <item.icon
                               className={`h-6 w-6 shrink-0 ${

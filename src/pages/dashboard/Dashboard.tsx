@@ -1,6 +1,5 @@
-import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useEffect, useState } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../../services/firebase/config';
 import {
   UserGroupIcon,
@@ -8,6 +7,7 @@ import {
   CurrencyRupeeIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -18,9 +18,9 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    const fetchStats = async () => {
-      if (!auth.currentUser) return;
+    if (!auth.currentUser) return;
 
+    const fetchStaticStats = async () => {
       try {
         // Get total patients
         const patientsQuery = query(
@@ -43,41 +43,61 @@ export default function Dashboard() {
         const appointmentsSnapshot = await getDocs(appointmentsQuery);
         const todayAppointments = appointmentsSnapshot.size;
 
-        // Get monthly revenue and pending invoices
-        const invoicesQuery = query(
-          collection(db, 'clinics', auth.currentUser.uid, 'invoices')
-        );
-        const invoicesSnapshot = await getDocs(invoicesQuery);
-        
-        let monthlyRevenue = 0;
-        let pendingInvoices = 0;
-        
-        const currentMonth = new Date().getMonth();
-        invoicesSnapshot.forEach((doc) => {
-          const data = doc.data();
-          const invoiceDate = new Date(data.date);
-          
-          if (invoiceDate.getMonth() === currentMonth) {
-            monthlyRevenue += data.amount || 0;
-          }
-          
-          if (data.status === 'pending') {
-            pendingInvoices++;
-          }
-        });
-
-        setStats({
+        setStats(prev => ({
+          ...prev,
           totalPatients,
           todayAppointments,
-          monthlyRevenue,
-          pendingInvoices,
-        });
+        }));
       } catch (error) {
-        console.error('Error fetching stats:', error);
+        console.error('Error fetching static stats:', error);
       }
     };
 
-    fetchStats();
+    // Fetch static stats once
+    fetchStaticStats();
+
+    // Set up real-time listener for invoices
+    const invoicesQuery = query(
+      collection(db, 'clinics', auth.currentUser.uid, 'invoices')
+    );
+
+    const unsubscribe = onSnapshot(invoicesQuery, (snapshot) => {
+      let monthlyRevenue = 0;
+      let pendingInvoices = 0;
+      
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        
+        // Count both draft and pending invoices
+        if (data.status === 'draft' || data.status === 'pending') {
+          pendingInvoices++;
+        }
+        
+        // Calculate monthly revenue from paid invoices
+        if (data.status === 'paid') {
+          const invoiceDate = new Date(data.date);
+          if (invoiceDate.getMonth() === currentMonth && 
+              invoiceDate.getFullYear() === currentYear) {
+            monthlyRevenue += data.total || 0;
+          }
+        }
+      });
+
+      setStats(prev => ({
+        ...prev,
+        monthlyRevenue,
+        pendingInvoices,
+      }));
+    }, (error) => {
+      console.error('Error in invoice listener:', error);
+    });
+
+    // Cleanup subscription
+    return () => unsubscribe();
   }, []);
 
   const stats_cards = [
@@ -97,49 +117,33 @@ export default function Dashboard() {
       name: 'Monthly Revenue',
       value: `₹${stats.monthlyRevenue.toLocaleString()}`,
       icon: CurrencyRupeeIcon,
-      color: 'bg-purple-500',
+      color: 'bg-yellow-500',
     },
     {
       name: 'Pending Invoices',
       value: stats.pendingInvoices,
       icon: ClockIcon,
-      color: 'bg-yellow-500',
+      color: 'bg-red-500',
     },
   ];
 
   return (
     <DashboardLayout>
-      <div className="w-full space-y-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-        
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {stats_cards.map((stat) => (
-            <div key={stat.name} className="overflow-hidden bg-white rounded-lg shadow">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <stat.icon
-                      className={`w-6 h-6 text-white p-1 rounded ${stat.color}`}
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div className="flex-1 w-0 ml-5">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        {stat.name}
-                      </dt>
-                      <dd className="text-lg font-semibold text-gray-900">
-                        {stat.value}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
+      <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
+        {stats_cards.map((card) => (
+          <div
+            key={card.name}
+            className="flex items-center p-4 bg-white rounded-lg shadow-xs"
+          >
+            <div className={`p-3 mr-4 rounded-full ${card.color} text-white`}>
+              <card.icon className="w-5 h-5" />
             </div>
-          ))}
-        </div>
-
-        {/* Add more dashboard content here */}
+            <div>
+              <p className="mb-2 text-sm font-medium text-gray-600">{card.name}</p>
+              <p className="text-lg font-semibold text-gray-700">{card.value}</p>
+            </div>
+          </div>
+        ))}
       </div>
     </DashboardLayout>
   );

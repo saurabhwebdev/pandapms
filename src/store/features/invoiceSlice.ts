@@ -18,12 +18,10 @@ const initialState: InvoiceState = {
 };
 
 // Helper function to generate invoice number
-const generateInvoiceNumber = (latestNumber: number = 0): string => {
-  const prefix = 'INV';
-  const year = new Date().getFullYear().toString().slice(-2);
-  const number = (latestNumber + 1).toString().padStart(4, '0');
-  return `${prefix}${year}${number}`;
-};
+function generateInvoiceNumber(latestNumber: number = 0): string {
+  const nextNumber = latestNumber + 1;
+  return `INV${nextNumber.toString().padStart(4, '0')}`;
+}
 
 export const fetchInvoices = createAsyncThunk(
   'invoices/fetchInvoices',
@@ -32,31 +30,17 @@ export const fetchInvoices = createAsyncThunk(
       const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
 
-      const invoicesRef = collection(db, 'invoices');
+      const invoicesRef = collection(db, 'clinics', user.uid, 'invoices');
       const q = query(
         invoicesRef,
-        where('clinicId', '==', user.uid),
         orderBy('createdAt', 'desc')
       );
 
-      try {
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Invoice[];
-      } catch (error: any) {
-        // Log the full error object for Firebase index errors
-        console.error('Firebase Query Error:', error);
-        
-        // Check if it's an index error (error code 9)
-        if (error?.code === 'failed-precondition' && error?.message?.includes('index')) {
-          console.log('Firebase Index Creation URL:', error?.message?.match(/https:\/\/console\.firebase\.google\.com[^\s]*/)?.[0]);
-          return rejectWithValue('Missing required index. Check console for index creation link.');
-        }
-        
-        throw error; // Re-throw other errors
-      }
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Invoice[];
     } catch (error: any) {
       console.error('Fetch Invoices Error:', error);
       return rejectWithValue(error.message);
@@ -87,7 +71,7 @@ export const addInvoice = createAsyncThunk(
         updatedAt: now,
       };
 
-      const docRef = await addDoc(collection(db, 'invoices'), invoiceData);
+      const docRef = await addDoc(collection(db, 'clinics', user.uid, 'invoices'), invoiceData);
       return { id: docRef.id, ...invoiceData } as Invoice;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -102,7 +86,7 @@ export const updateInvoice = createAsyncThunk(
       const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
 
-      const invoiceRef = doc(db, 'invoices', id);
+      const invoiceRef = doc(db, 'clinics', user.uid, 'invoices', id);
       const updatedData = {
         ...data,
         updatedAt: Timestamp.now().toDate().toISOString(),
@@ -123,7 +107,7 @@ export const deleteInvoice = createAsyncThunk(
       const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
 
-      const invoiceRef = doc(db, 'invoices', id);
+      const invoiceRef = doc(db, 'clinics', user.uid, 'invoices', id);
       await deleteDoc(invoiceRef);
       return id;
     } catch (error: any) {
@@ -139,7 +123,7 @@ export const markInvoiceAsPaid = createAsyncThunk(
       const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
 
-      const invoiceRef = doc(db, 'invoices', id);
+      const invoiceRef = doc(db, 'clinics', user.uid, 'invoices', id);
       const paidData = {
         status: 'paid',
         paidAmount: amount,
@@ -224,7 +208,7 @@ const invoiceSlice = createSlice({
           state.invoices[index] = { ...state.invoices[index], ...action.payload };
         }
       });
-  },
+  }
 });
 
 export const selectInvoices = (state: RootState) => state.invoices.invoices;

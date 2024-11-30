@@ -3,9 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { format } from 'date-fns';
 import { Invoice } from '../../types/invoice';
 import { selectInvoices } from '../../store/features/invoiceSlice';
-import { deleteInvoice, markInvoiceAsPaid } from '../../store/features/invoiceSlice';
+import { deleteInvoice, markInvoiceAsPaid, fetchInvoices } from '../../store/features/invoiceSlice';
 import { AppDispatch } from '../../store/store';
 import { generateInvoicePDF } from '../../utils/invoicePdfGenerator';
+import toast from 'react-hot-toast';
 
 interface InvoiceListProps {
   onEdit: (invoice: Invoice) => void;
@@ -24,17 +25,29 @@ const InvoiceList: React.FC<InvoiceListProps> = ({ onEdit, clinicInfo }) => {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this invoice?')) {
-      await dispatch(deleteInvoice(id));
+      try {
+        await dispatch(deleteInvoice(id)).unwrap();
+        toast.success('Invoice deleted successfully');
+      } catch (error) {
+        toast.error('Failed to delete invoice');
+      }
     }
   };
 
   const handleMarkAsPaid = async (invoice: Invoice) => {
     if (window.confirm('Mark this invoice as paid?')) {
-      await dispatch(markInvoiceAsPaid({
-        id: invoice.id,
-        amount: invoice.total,
-        paymentMethod: 'cash'
-      }));
+      try {
+        await dispatch(markInvoiceAsPaid({
+          id: invoice.id,
+          amount: invoice.total,
+          paymentMethod: 'cash'
+        })).unwrap();
+        toast.success('Invoice marked as paid');
+        // Refresh invoices to ensure all components have latest data
+        dispatch(fetchInvoices());
+      } catch (error) {
+        toast.error('Failed to mark invoice as paid');
+      }
     }
   };
 
@@ -115,7 +128,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({ onEdit, clinicInfo }) => {
                   {format(new Date(invoice.date), 'dd/MM/yyyy')}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {invoice.currency} {invoice.total.toFixed(2)}
+                  {invoice.currency} {invoice.total.toLocaleString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(invoice.status)}`}>
@@ -140,7 +153,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({ onEdit, clinicInfo }) => {
                       onClick={() => handleMarkAsPaid(invoice)}
                       className="text-green-600 hover:text-green-900"
                     >
-                      Mark Paid
+                      Mark as Paid
                     </button>
                   )}
                   <button
